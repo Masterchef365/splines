@@ -250,7 +250,7 @@ pub struct SharedSpline<T, V>{
 
 #[cfg_attr(
   any(feature = "serialization", feature = "serde"),
-  derive(Deserialize, Serialize)
+  derive(serde::Deserialize, serde::Serialize)
 )]
 #[derive(Clone, Debug)]
 pub enum NestedSpline<T, V> {
