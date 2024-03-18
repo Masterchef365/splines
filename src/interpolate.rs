@@ -346,3 +346,9 @@ impl<T: Interpolator, V: Interpolate<T>> NestedSpline<T, V> {
     }
   }
 }
+
+impl<T: Default, V: Default> Default for NestedSpline<T, V> {
+    fn default() -> Self {
+        Self::Unit(Rc::new(Spline::default()))
+    }
+}
