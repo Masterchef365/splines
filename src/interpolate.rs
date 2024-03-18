@@ -266,24 +266,24 @@ pub enum InterpolationOperation<T, V> {
   CubicBezierMirrored(T, Box<Self>, Box<Self>, Box<Self>, Box<Self>),
 }
 
-impl<V: Interpolate<f32>> Interpolate<f32> for InterpolationOperation<f32, V> {
-  fn step(t: f32, threshold: f32, a: Self, b: Self) -> Self {
+impl<T: Interpolator, V: Interpolate<T>> Interpolate<T> for InterpolationOperation<T, V> {
+  fn step(t: T, threshold: T, a: Self, b: Self) -> Self {
     Self::Step(t, threshold, Box::new(a), Box::new(b))
   }
 
-  fn lerp(t: f32, a: Self, b: Self) -> Self {
+  fn lerp(t: T, a: Self, b: Self) -> Self {
     Self::Lerp(t, Box::new(a), Box::new(b))
   }
 
-  fn cosine(t: f32, a: Self, b: Self) -> Self {
+  fn cosine(t: T, a: Self, b: Self) -> Self {
     Self::Cosine(t, Box::new(a), Box::new(b))
   }
 
-  fn cubic_bezier(t: f32, a: Self, u: Self, v: Self, b: Self) -> Self {
+  fn cubic_bezier(t: T, a: Self, u: Self, v: Self, b: Self) -> Self {
     Self::CubicBezier(t, Box::new(a), Box::new(u), Box::new(v), Box::new(b))
   }
 
-  fn cubic_hermite(t: f32, x: (f32, Self), a: (f32, Self), b: (f32, Self), y: (f32, Self)) -> Self {
+  fn cubic_hermite(t: T, x: (T, Self), a: (T, Self), b: (T, Self), y: (T, Self)) -> Self {
     Self::CubicHermite(
       t,
       (x.0, Box::new(x.1)),
@@ -293,11 +293,11 @@ impl<V: Interpolate<f32>> Interpolate<f32> for InterpolationOperation<f32, V> {
     )
   }
 
-  fn quadratic_bezier(t: f32, a: Self, u: Self, b: Self) -> Self {
+  fn quadratic_bezier(t: T, a: Self, u: Self, b: Self) -> Self {
     Self::QuadraticBezier(t, Box::new(a), Box::new(u), Box::new(b))
   }
 
-  fn cubic_bezier_mirrored(t: f32, a: Self, u: Self, v: Self, b: Self) -> Self {
+  fn cubic_bezier_mirrored(t: T, a: Self, u: Self, v: Self, b: Self) -> Self {
     Self::CubicBezierMirrored(t, Box::new(a), Box::new(u), Box::new(v), Box::new(b))
   }
 }
