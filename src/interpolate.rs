@@ -249,7 +249,7 @@ pub struct SharedSpline<T, V>{
 */
 
 #[derive(Clone)]
-pub enum InterpolationOperation<T, V> {
+pub enum NestedSpline<T, V> {
   Unit(Rc<Spline<T, V>>),
   Step(T, T, Box<Self>, Box<Self>),
   Cosine(T, Box<Self>, Box<Self>),
@@ -266,7 +266,7 @@ pub enum InterpolationOperation<T, V> {
   CubicBezierMirrored(T, Box<Self>, Box<Self>, Box<Self>, Box<Self>),
 }
 
-impl<T: Interpolator, V: Interpolate<T>> Interpolate<T> for InterpolationOperation<T, V> {
+impl<T: Interpolator, V: Interpolate<T>> Interpolate<T> for NestedSpline<T, V> {
   fn step(t: T, threshold: T, a: Self, b: Self) -> Self {
     Self::Step(t, threshold, Box::new(a), Box::new(b))
   }
@@ -299,5 +299,51 @@ impl<T: Interpolator, V: Interpolate<T>> Interpolate<T> for InterpolationOperati
 
   fn cubic_bezier_mirrored(t: T, a: Self, u: Self, v: Self, b: Self) -> Self {
     Self::CubicBezierMirrored(t, Box::new(a), Box::new(u), Box::new(v), Box::new(b))
+  }
+}
+
+impl<T: Interpolator, V: Interpolate<T>> NestedSpline<T, V> {
+  pub fn new(spline: Spline<T, V>) -> Self {
+    Self::Unit(Rc::new(spline))
+  }
+
+  pub fn sample(&self, t: T) -> Option<V>
+  where
+    T: Copy,
+  {
+    match self {
+      Self::Unit(spline) => spline.sample(t),
+      Self::Step(t, threshold, a, b) => Some(V::step(*t, *threshold, a.sample(*t)?, b.sample(*t)?)),
+      Self::Lerp(t, a, b) => Some(V::lerp(*t, a.sample(*t)?, b.sample(*t)?)),
+      Self::Cosine(t, a, b) => Some(V::cosine(*t, a.sample(*t)?, b.sample(*t)?)),
+      Self::QuadraticBezier(t, a, u, b) => Some(V::quadratic_bezier(
+        *t,
+        a.sample(*t)?,
+        u.sample(*t)?,
+        b.sample(*t)?,
+      )),
+      Self::CubicBezier(t, a, u, v, b) => Some(V::cubic_bezier(
+        *t,
+        a.sample(*t)?,
+        u.sample(*t)?,
+        v.sample(*t)?,
+        b.sample(*t)?,
+      )),
+      Self::CubicBezierMirrored(t, a, u, v, b) => Some(V::cubic_bezier_mirrored(
+        *t,
+        a.sample(*t)?,
+        u.sample(*t)?,
+        v.sample(*t)?,
+        b.sample(*t)?,
+      )),
+      // fn cubic_hermite(t: T, x: (T, Self), a: (T, Self), b: (T, Self), y: (T, Self)) -> Self;
+      Self::CubicHermite(t, x, a, b, y) => Some(V::cubic_hermite(
+        *t,
+        (x.0, x.1.sample(*t)?),
+        (a.0, a.1.sample(*t)?),
+        (b.0, b.1.sample(*t)?),
+        (y.0, y.1.sample(*t)?),
+      )),
+    }
   }
 }
