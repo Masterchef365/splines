@@ -336,7 +336,6 @@ impl<T: Interpolator, V: Interpolate<T>> NestedSpline<T, V> {
         v.sample(*t)?,
         b.sample(*t)?,
       )),
-      // fn cubic_hermite(t: T, x: (T, Self), a: (T, Self), b: (T, Self), y: (T, Self)) -> Self;
       Self::CubicHermite(t, x, a, b, y) => Some(V::cubic_hermite(
         *t,
         (x.0, x.1.sample(*t)?),
