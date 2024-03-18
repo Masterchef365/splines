@@ -240,36 +240,64 @@ impl_InterpolateT!(f32, f64, std::f32::consts::PI);
 
 use std::rc::Rc;
 
+/*
 /// Spline which is cheap to clone (Rc underneath)
 #[derive(Clone)]
-pub struct SharedSpline<T, V>(Rc<Spline<T, V>>);
+pub struct SharedSpline<T, V>{
+    pub inner: ,
+}
+*/
 
-impl<T: Copy, V: Clone> Interpolate<T> for SharedSpline<T, V> {
-    fn step(t: T, threshold: T, a: Self, b: Self) -> Self {
-        todo!()
-    }
+#[derive(Clone)]
+pub enum InterpolationOperation<T, V> {
+  Unit(Rc<Spline<T, V>>),
+  Step(T, T, Box<Self>, Box<Self>),
+  Cosine(T, Box<Self>, Box<Self>),
+  Lerp(T, Box<Self>, Box<Self>),
+  CubicHermite(
+    T,
+    (T, Box<Self>),
+    (T, Box<Self>),
+    (T, Box<Self>),
+    (T, Box<Self>),
+  ),
+  QuadraticBezier(T, Box<Self>, Box<Self>, Box<Self>),
+  CubicBezier(T, Box<Self>, Box<Self>, Box<Self>, Box<Self>),
+  CubicBezierMirrored(T, Box<Self>, Box<Self>, Box<Self>, Box<Self>),
+}
 
-    fn lerp(t: T, a: Self, b: Self) -> Self {
-        todo!()
-    }
+impl<V: Interpolate<f32>> Interpolate<f32> for InterpolationOperation<f32, V> {
+  fn step(t: f32, threshold: f32, a: Self, b: Self) -> Self {
+    Self::Step(t, threshold, Box::new(a), Box::new(b))
+  }
 
-    fn cosine(t: T, a: Self, b: Self) -> Self {
-        todo!()
-    }
+  fn lerp(t: f32, a: Self, b: Self) -> Self {
+    Self::Lerp(t, Box::new(a), Box::new(b))
+  }
 
-    fn cubic_bezier(t: T, a: Self, u: Self, v: Self, b: Self) -> Self {
-        todo!()
-    }
+  fn cosine(t: f32, a: Self, b: Self) -> Self {
+    Self::Cosine(t, Box::new(a), Box::new(b))
+  }
 
-    fn cubic_hermite(t: T, x: (T, Self), a: (T, Self), b: (T, Self), y: (T, Self)) -> Self {
-        todo!()
-    }
+  fn cubic_bezier(t: f32, a: Self, u: Self, v: Self, b: Self) -> Self {
+    Self::CubicBezier(t, Box::new(a), Box::new(u), Box::new(v), Box::new(b))
+  }
 
-    fn quadratic_bezier(t: T, a: Self, u: Self, b: Self) -> Self {
-        todo!()
-    }
+  fn cubic_hermite(t: f32, x: (f32, Self), a: (f32, Self), b: (f32, Self), y: (f32, Self)) -> Self {
+    Self::CubicHermite(
+      t,
+      (x.0, Box::new(x.1)),
+      (a.0, Box::new(a.1)),
+      (b.0, Box::new(b.1)),
+      (y.0, Box::new(y.1)),
+    )
+  }
 
-    fn cubic_bezier_mirrored(t: T, a: Self, u: Self, v: Self, b: Self) -> Self {
-        todo!()
-    }
+  fn quadratic_bezier(t: f32, a: Self, u: Self, b: Self) -> Self {
+    Self::QuadraticBezier(t, Box::new(a), Box::new(u), Box::new(b))
+  }
+
+  fn cubic_bezier_mirrored(t: f32, a: Self, u: Self, v: Self, b: Self) -> Self {
+    Self::CubicBezierMirrored(t, Box::new(a), Box::new(u), Box::new(v), Box::new(b))
+  }
 }
