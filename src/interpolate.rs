@@ -43,6 +43,8 @@ use std::f32;
 #[cfg(feature = "std")]
 use std::f64;
 
+use crate::Spline;
+
 /// Types that can be used as interpolator in splines.
 ///
 /// An interpolator value is like the fabric on which control keys (and sampled values) live on.
@@ -68,7 +70,7 @@ impl_Interpolator!(f64);
 ///
 /// `T` is the interpolator used to sample with. Typical implementations use [`f32`] or [`f64`], but
 /// you’re free to use the ones you like.
-pub trait Interpolate<T>: Sized + Copy {
+pub trait Interpolate<T>: Sized + Clone {
   /// Step interpolation.
   fn step(t: T, threshold: T, a: Self, b: Self) -> Self;
 
@@ -235,3 +237,39 @@ macro_rules! impl_InterpolateT {
 impl_Interpolate!(f32, f32, std::f32::consts::PI);
 impl_Interpolate!(f64, f64, std::f64::consts::PI);
 impl_InterpolateT!(f32, f64, std::f32::consts::PI);
+
+use std::rc::Rc;
+
+/// Spline which is cheap to clone (Rc underneath)
+#[derive(Clone)]
+pub struct SharedSpline<T, V>(Rc<Spline<T, V>>);
+
+impl<T: Copy, V: Clone> Interpolate<T> for SharedSpline<T, V> {
+    fn step(t: T, threshold: T, a: Self, b: Self) -> Self {
+        todo!()
+    }
+
+    fn lerp(t: T, a: Self, b: Self) -> Self {
+        todo!()
+    }
+
+    fn cosine(t: T, a: Self, b: Self) -> Self {
+        todo!()
+    }
+
+    fn cubic_bezier(t: T, a: Self, u: Self, v: Self, b: Self) -> Self {
+        todo!()
+    }
+
+    fn cubic_hermite(t: T, x: (T, Self), a: (T, Self), b: (T, Self), y: (T, Self)) -> Self {
+        todo!()
+    }
+
+    fn quadratic_bezier(t: T, a: Self, u: Self, b: Self) -> Self {
+        todo!()
+    }
+
+    fn cubic_bezier_mirrored(t: T, a: Self, u: Self, v: Self, b: Self) -> Self {
+        todo!()
+    }
+}

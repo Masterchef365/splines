@@ -123,11 +123,11 @@ impl<T, V> Spline<T, V> {
     let i = search_lower_cp(keys, &t)?;
     let cp0 = &keys[i];
 
-    let value = match cp0.interpolation {
+    let value = match cp0.interpolation.clone() {
       Interpolation::Step(threshold) => {
         let cp1 = &keys[i + 1];
         let nt = t.normalize(cp0.t, cp1.t);
-        let value = V::step(nt, threshold, cp0.value, cp1.value);
+        let value = V::step(nt, threshold, cp0.value.clone(), cp1.value.clone());
 
         Some(value)
       }
@@ -135,7 +135,7 @@ impl<T, V> Spline<T, V> {
       Interpolation::Linear => {
         let cp1 = &keys[i + 1];
         let nt = t.normalize(cp0.t, cp1.t);
-        let value = V::lerp(nt, cp0.value, cp1.value);
+        let value = V::lerp(nt, cp0.value.clone(), cp1.value.clone());
 
         Some(value)
       }
@@ -143,7 +143,7 @@ impl<T, V> Spline<T, V> {
       Interpolation::Cosine => {
         let cp1 = &keys[i + 1];
         let nt = t.normalize(cp0.t, cp1.t);
-        let value = V::cosine(nt, cp0.value, cp1.value);
+        let value = V::cosine(nt, cp0.value.clone(), cp1.value.clone());
 
         Some(value)
       }
@@ -160,10 +160,10 @@ impl<T, V> Spline<T, V> {
           let nt = t.normalize(cp0.t, cp1.t);
           let value = V::cubic_hermite(
             nt,
-            (cpm0.t, cpm0.value),
-            (cp0.t, cp0.value),
-            (cp1.t, cp1.value),
-            (cpm1.t, cpm1.value),
+            (cpm0.t, cpm0.value.clone()),
+            (cp0.t, cp0.value.clone()),
+            (cp1.t, cp1.value.clone()),
+            (cpm1.t, cpm1.value.clone()),
           );
 
           Some(value)
@@ -175,12 +175,12 @@ impl<T, V> Spline<T, V> {
         let cp1 = &keys[i + 1];
         let nt = t.normalize(cp0.t, cp1.t);
 
-        let value = match cp1.interpolation {
-          Interpolation::Bezier(v) => V::cubic_bezier_mirrored(nt, cp0.value, u, v, cp1.value),
+        let value = match cp1.interpolation.clone() {
+          Interpolation::Bezier(v) => V::cubic_bezier_mirrored(nt, cp0.value.clone(), u, v, cp1.value.clone()),
 
-          Interpolation::StrokeBezier(v, _) => V::cubic_bezier(nt, cp0.value, u, v, cp1.value),
+          Interpolation::StrokeBezier(v, _) => V::cubic_bezier(nt, cp0.value.clone(), u, v, cp1.value.clone()),
 
-          _ => V::quadratic_bezier(nt, cp0.value, u, cp1.value),
+          _ => V::quadratic_bezier(nt, cp0.value.clone(), u, cp1.value.clone()),
         };
 
         Some(value)
@@ -225,7 +225,7 @@ impl<T, V> Spline<T, V> {
 
       if t <= first.t {
         let sampled = SampledWithKey {
-          value: first.value,
+          value: first.value.clone(),
           key: 0,
         };
         Some(sampled)
@@ -234,7 +234,7 @@ impl<T, V> Spline<T, V> {
 
         if t >= last.t {
           let sampled = SampledWithKey {
-            value: last.value,
+            value: last.value.clone(),
             key: self.0.len() - 1,
           };
           Some(sampled)
