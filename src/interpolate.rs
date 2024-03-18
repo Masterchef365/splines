@@ -248,7 +248,7 @@ pub struct SharedSpline<T, V>{
 }
 */
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum NestedSpline<T, V> {
   Unit(Rc<Spline<T, V>>),
   Step(T, T, Box<Self>, Box<Self>),
@@ -307,41 +307,41 @@ impl<T: Interpolator, V: Interpolate<T>> NestedSpline<T, V> {
     Self::Unit(Rc::new(spline))
   }
 
-  pub fn sample(&self, t: T) -> Option<V>
+  pub fn sample(&self, call_t: T) -> Option<V>
   where
     T: Copy,
   {
     match self {
-      Self::Unit(spline) => spline.sample(t),
-      Self::Step(t, threshold, a, b) => Some(V::step(*t, *threshold, a.sample(*t)?, b.sample(*t)?)),
-      Self::Lerp(t, a, b) => Some(V::lerp(*t, a.sample(*t)?, b.sample(*t)?)),
-      Self::Cosine(t, a, b) => Some(V::cosine(*t, a.sample(*t)?, b.sample(*t)?)),
+      Self::Unit(spline) => spline.sample(call_t),
+      Self::Step(t, threshold, a, b) => Some(V::step(*t, *threshold, a.sample(call_t)?, b.sample(call_t)?)),
+      Self::Lerp(t, a, b) => Some(V::lerp(*t, a.sample(call_t)?, b.sample(call_t)?)),
+      Self::Cosine(t, a, b) => Some(V::cosine(*t, a.sample(call_t)?, b.sample(call_t)?)),
       Self::QuadraticBezier(t, a, u, b) => Some(V::quadratic_bezier(
         *t,
-        a.sample(*t)?,
-        u.sample(*t)?,
-        b.sample(*t)?,
+        a.sample(call_t)?,
+        u.sample(call_t)?,
+        b.sample(call_t)?,
       )),
       Self::CubicBezier(t, a, u, v, b) => Some(V::cubic_bezier(
         *t,
-        a.sample(*t)?,
-        u.sample(*t)?,
-        v.sample(*t)?,
-        b.sample(*t)?,
+        a.sample(call_t)?,
+        u.sample(call_t)?,
+        v.sample(call_t)?,
+        b.sample(call_t)?,
       )),
       Self::CubicBezierMirrored(t, a, u, v, b) => Some(V::cubic_bezier_mirrored(
         *t,
-        a.sample(*t)?,
-        u.sample(*t)?,
-        v.sample(*t)?,
-        b.sample(*t)?,
+        a.sample(call_t)?,
+        u.sample(call_t)?,
+        v.sample(call_t)?,
+        b.sample(call_t)?,
       )),
       Self::CubicHermite(t, x, a, b, y) => Some(V::cubic_hermite(
         *t,
-        (x.0, x.1.sample(*t)?),
-        (a.0, a.1.sample(*t)?),
-        (b.0, b.1.sample(*t)?),
-        (y.0, y.1.sample(*t)?),
+        (x.0, x.1.sample(call_t)?),
+        (a.0, a.1.sample(call_t)?),
+        (b.0, b.1.sample(call_t)?),
+        (y.0, y.1.sample(call_t)?),
       )),
     }
   }

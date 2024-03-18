@@ -24,7 +24,7 @@ fn main() {
     Key::new(1.0f32, NestedSpline::Unit(Rc::new(spline_b)), Interpolation::Linear),
   ]);
 
-  println!("value at 0, 0: {:?}", nested.sample(0.1).unwrap().sample(0.1));
+  println!("value at 0, 0: {:?}", dbg!(nested.sample(0.1)).unwrap().sample(0.1));
   println!("value at 0, 1: {:?}", nested.sample(0.1).unwrap().sample(0.9));
   println!("value at 1, 0: {:?}", nested.sample(0.9).unwrap().sample(0.1));
   println!("value at 1, 1: {:?}", nested.sample(0.9).unwrap().sample(0.9));
