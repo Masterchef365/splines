@@ -51,6 +51,7 @@ fn main() {
     Key::new(1.0f32, NestedSpline::Unit(Rc::new(nested_b)), Interpolation::Linear),
   ]);
 
+  dbg!(std::any::type_name_of_val(&nested));
 
   println!("value at 0, 0, 0: {:?}", nested.sample(0.1).unwrap().sample(0.1).unwrap().sample(0.1));
   println!("value at 0, 0, 1: {:?}", nested.sample(0.1).unwrap().sample(0.1).unwrap().sample(0.9));
