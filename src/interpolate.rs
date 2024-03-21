@@ -248,13 +248,19 @@ pub struct SharedSpline<T, V>{
 }
 */
 
+/// This hack allows the rest of the spline library to manipulate us through the Interpolate<T>
+/// interface, which then allows us to sit inside a spline. It does this by deferring the
+/// operations (which would be costly to actually execute, like multiplying each key by a nnumber)
+/// into a tree which is then evaluated.
 #[cfg_attr(
   any(feature = "serialization", feature = "serde"),
   derive(serde::Deserialize, serde::Serialize)
 )]
 #[derive(Clone, Debug)]
 pub enum NestedSpline<T, V> {
+    /// This is the base case; the spline we're actually sampling.  
   Unit(Rc<Spline<T, V>>),
+
   Step(T, T, Box<Self>, Box<Self>),
   Cosine(T, Box<Self>, Box<Self>),
   Lerp(T, Box<Self>, Box<Self>),
@@ -311,10 +317,16 @@ impl<T: Interpolator, V: Interpolate<T>> NestedSpline<T, V> {
     Self::Unit(Rc::new(spline))
   }
 
+  pub fn spline(&self) -> &Spline<T, V> where T: std::fmt::Debug, V: std::fmt::Debug {
+      dbg!(self);
+      todo!()
+  }
+
   pub fn sample(&self, call_t: T) -> Option<V>
   where
     T: Copy,
   {
+      eprintln!("Sample called!");
     match self {
       Self::Unit(spline) => spline.sample(call_t),
       Self::Step(t, threshold, a, b) => Some(V::step(*t, *threshold, a.sample(call_t)?, b.sample(call_t)?)),
