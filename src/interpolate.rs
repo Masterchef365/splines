@@ -317,9 +317,10 @@ impl<T: Interpolator, V: Interpolate<T>> NestedSpline<T, V> {
     Self::Unit(Rc::new(spline))
   }
 
-  pub fn spline(&self) -> &Spline<T, V> where T: std::fmt::Debug, V: std::fmt::Debug {
-      dbg!(self);
-      todo!()
+  /// Get the spline we were constructed with
+  pub fn inner(&self) -> &Spline<T, V> {
+    let NestedSpline::Unit(spline) = &self else { unreachable!() };
+    spline
   }
 
   pub fn sample(&self, call_t: T) -> Option<V>
