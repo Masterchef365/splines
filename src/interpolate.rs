@@ -327,7 +327,6 @@ impl<T: Interpolator, V: Interpolate<T>> NestedSpline<T, V> {
   where
     T: Copy,
   {
-      eprintln!("Sample called!");
     match self {
       Self::Unit(spline) => spline.sample(call_t),
       Self::Step(t, threshold, a, b) => Some(V::step(*t, *threshold, a.sample(call_t)?, b.sample(call_t)?)),
