@@ -328,7 +328,7 @@ impl<T: Interpolator, V: Interpolate<T>> NestedSpline<T, V> {
     T: Copy,
   {
     match self {
-      Self::Unit(spline) => spline.sample(call_t),
+      Self::Unit(spline) => spline.clamped_sample(call_t),
       Self::Step(t, threshold, a, b) => Some(V::step(*t, *threshold, a.sample(call_t)?, b.sample(call_t)?)),
       Self::Lerp(t, a, b) => Some(V::lerp(*t, a.sample(call_t)?, b.sample(call_t)?)),
       Self::Cosine(t, a, b) => Some(V::cosine(*t, a.sample(call_t)?, b.sample(call_t)?)),
